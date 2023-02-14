@@ -83,8 +83,8 @@ function App() {
   const setRandomPosition = useCallback(() => {
     const randomNodes = nodes.map((cur) => ({
       ...cur,
-      left: getRandom(500),
-      top: getRandom(400),
+      left: getRandom(1000),
+      top: getRandom(1000),
     }));
     setNodes(randomNodes);
   }, [nodes]);
@@ -287,7 +287,7 @@ function App() {
                 width: "200px",
                 backgroundColor: "#3a3838",
                 padding: "8px",
-                borderRadius: "4 px",
+                borderRadius: "8px",
                 color: "white",
                 zIndex: 9999,
               }}
@@ -306,7 +306,10 @@ function App() {
                 top: cur.top,
                 left: cur.left,
                 border: "solid 2px royalBlue",
-                width: "300px",
+                width: "200px",
+
+
+                height:"100px",
                 boxSizing: "border-box",
               }}
             >

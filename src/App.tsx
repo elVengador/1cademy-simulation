@@ -56,9 +56,16 @@ function App() {
     setRandomPosition()
   }, [])
 
-  const onChoseNode = useCallback((chosenNode: string, selectedNode: string) => {
-    console.log("choseNode", {chosenNode, selectedNode});
+  const onChoseNode = useCallback((chosenNode: string, selectedNode: string | null) => {
+    if (!selectedNode) return
+    console.log("choseNode", { chosenNode, selectedNode });
   }, []);
+
+  const onChosingNode = useCallback((nodeId: string) => {
+    if (!selectedNode) return
+    if (!chosingNode || selectedNode === nodeId) return;
+    onChoseNode(nodeId, selectedNode);
+  }, [])
 
   return (
     <div className="App">
@@ -78,12 +85,12 @@ function App() {
 
       <div style={{ border: "solid 2px pink", width: "800px", height: "500px" }}>
         <button onClick={setRandomPosition}>{"move"}</button>
+        {!chosingNode && <h3>Start Chosing Node (Tag, Child, Parent, Reference)</h3>}
         <MapInteractionCSS >
           {nodes.map(cur => {
             return <MemoizedNode
-              chosingNode={chosingNode}
               selectedNode={selectedNode}
-              onChoseNode={onChoseNode}
+              onChoseNode={onChosingNode}
               setChosingNode={setChosingNode}
               setSelectedNode={setSelectedNode}
               id={cur.id}
@@ -91,7 +98,7 @@ function App() {
               top={cur.top}
               title={cur.title}
               key={cur.id}
-              />
+            />
           })}
         </MapInteractionCSS>
       </div>

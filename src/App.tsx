@@ -18,6 +18,7 @@ type Node = {
   title: string;
   top: number;
   left: number;
+  description: string;
 };
 
 const steps: Step[] = [
@@ -39,9 +40,27 @@ const steps: Step[] = [
 ];
 
 const InitialNodes: Node[] = [
-  { id: "n1", title: "node title 1", top: 0, left: 0 },
-  { id: "n2", title: "node title 2", top: 0, left: 0 },
-  { id: "n3", title: "node title 3", top: 0, left: 0 },
+  {
+    id: "n1",
+    title: "node title 1",
+    description: "node title 1",
+    top: 0,
+    left: 0,
+  },
+  {
+    id: "n2",
+    title: "node title 2",
+    description: "node title 2",
+    top: 0,
+    left: 0,
+  },
+  {
+    id: "n3",
+    title: "node title 3",
+    description: "node title 3",
+    top: 0,
+    left: 0,
+  },
 ];
 const DEFAULT_NUMBER_OF_TRIES = 5;
 function App() {
@@ -49,6 +68,8 @@ function App() {
   const [nodes, setNodes] = useState(InitialNodes);
 
   const [obj, setObj] = useState({ width: 0, height: 0, top: 0, left: 0 });
+  const tooltipRef = useRef<HTMLDivElement | null>(null);
+  const [toltipRect, setToltipRect] = useState({ top: 0, left: 0 });
   const ref = useRef<HTMLDivElement | null>(null);
 
   const {
@@ -57,7 +78,7 @@ function App() {
     previousStep,
     StepComponent,
     setCurrentStepIdx: setCurrentStep,
-  } = useInteractiveTutorial({ steps });
+  } = useInteractiveTutorial({ steps: nodes });
 
   const setRandomPosition = useCallback(() => {
     const randomNodes = nodes.map((cur) => ({
@@ -69,8 +90,6 @@ function App() {
   }, [nodes]);
 
   const observeTries2 = useRef(0);
-
-  const [id, setId] = useState("");
 
   useEffect(() => {
     if (!nodes[currentStep]) return;
@@ -123,6 +142,53 @@ function App() {
     });
   }, [nodes]);
 
+  function extractNumber(string: string) {
+    const match = string.match(/\d+$/);
+    if (match) {
+      return Number(match[0]);
+    }
+    return 0;
+  }
+
+  const addNode = () => {
+    setNodes((prev) => {
+      const lastNode = prev.slice(-1)[0];
+      const newNode: Node = {
+        title: `node title ${extractNumber(lastNode?.title ?? "") + 1}`,
+        id: `n${extractNumber(lastNode?.id ?? "") + 1}`,
+        left: getRandom(1000),
+        top: getRandom(1000),
+        description: `node title ${extractNumber(lastNode?.title ?? "") + 1}`,
+      };
+      return [...prev, newNode];
+    });
+  };
+
+  const handlePosition = (pos: "top" | "bottom" | "left" | "right") => {
+    if (!obj || !tooltipRef.current) return;
+    let top = 0;
+    let left = 0;
+
+    if (pos === "top") {
+      top = 0 - tooltipRef.current.clientHeight - 16;
+
+      left = obj.width / 2 - tooltipRef.current.clientWidth / 2;
+    }
+    if (pos === "bottom") {
+      top = obj.height + 16;
+      console.log({ top });
+      left = obj.width / 2 - tooltipRef.current.clientWidth / 2;
+    }
+    if (pos === "left") {
+      top = obj.height / 2 - tooltipRef.current.clientHeight / 2;
+      left = 0 - tooltipRef.current.clientWidth - 16;
+    }
+    if (pos === "right") {
+      top = obj.height / 2 - tooltipRef.current.clientHeight / 2;
+      left = obj.width + 16;
+    }
+    setToltipRect({ top, left });
+  };
   return (
     <div className="App">
       <div>
@@ -143,6 +209,11 @@ function App() {
       <button onClick={() => setCurrentStep(0)}>start</button>
       <button onClick={nextStep}>{">>"}</button>
       <button onClick={setRandomPosition}>{"move"}</button>
+      <button onClick={addNode}>{"Add"}</button>
+      <button onClick={() => handlePosition("top")}>top</button>
+      <button onClick={() => handlePosition("right")}>right</button>
+      <button onClick={() => handlePosition("bottom")}>bottom</button>
+      <button onClick={() => handlePosition("left")}>left</button>
       <div
         id="container"
         style={{ border: "solid 2px pink", width: "800px", height: "500px" }}
@@ -201,11 +272,30 @@ function App() {
               height: `${obj.height}px`,
               backgroundColor: "transparent",
               outline: "5000px solid #555555bd",
+              borderRadius: "1px",
               outlineOffset: "10px",
               boxSizing: "border-box",
-              zIndex:999
+              zIndex: 999,
             }}
-          ></div>
+          >
+            <div
+              ref={tooltipRef}
+              style={{
+                position: "absolute",
+                top: `${toltipRect.top}px`,
+                left: `${toltipRect.left}px`,
+                width: "200px",
+                backgroundColor: "#3a3838",
+                padding: "8px",
+                borderRadius: "4 px",
+                color: "white",
+                zIndex: 9999,
+              }}
+            >
+              <h2>{nodes[currentStep].title}</h2>
+              <p>Lorem ipsum dolor sit, amet consectetur adipisicing elit.</p>
+            </div>
+          </div>
           {nodes.map((cur) => (
             <div
               ref={cur.id === "n1" ? ref : null}
@@ -216,7 +306,7 @@ function App() {
                 top: cur.top,
                 left: cur.left,
                 border: "solid 2px royalBlue",
-                width: "100px",
+                width: "300px",
                 boxSizing: "border-box",
               }}
             >

@@ -4,8 +4,8 @@ import './App.css'
 /* eslint-disable */ //This wrapper comments it to use react-map-interaction without types
 // @ts-ignore
 import { MapInteractionCSS } from "react-map-interaction";
-import { Step, useInteractiveTutorial } from './useInteractiveTutorial';
 import { MemoizedNode } from './components/Node';
+import { useRefState } from './useRefState';
 /* eslint-enable */
 
 type Node = {
@@ -14,22 +14,6 @@ type Node = {
   top: number,
   left: number
 }
-
-const steps: Step[] = [
-  {
-    id: "n1",
-    title: "step 1",
-    description: "step-1"
-  }, {
-    id: "n2",
-    title: "step 2",
-    description: "step-2"
-  }, {
-    id: "n3",
-    title: "step 3",
-    description: "step-3"
-  }
-]
 
 const InitialNodes: Node[] = [
   { id: 'n1', title: "node title 1", top: 0, left: 0 },
@@ -40,12 +24,11 @@ const InitialNodes: Node[] = [
 function App() {
   console.log("Notebook re-render");
 
-  const [count, setCount] = useState(0)
   const [nodes, setNodes] = useState(InitialNodes);
-  const [selectedNode, setSelectedNode] = useState<string | null>(null);
   const [chosingNode, setChosingNode] = useState<boolean>(false);
+  const { ref: selectedNodeRef, state: selectedNode, setRefState: setSelectedNode } = useRefState()
 
-  const { currentStepIdx: currentStep, nextStep, previousStep, StepComponent, setCurrentStepIdx: setCurrentStep } = useInteractiveTutorial({ steps })
+
 
   const setRandomPosition = useCallback(() => {
     const randomNodes = nodes.map(cur => ({ ...cur, left: getRandom(500), top: getRandom(400) }))
@@ -56,15 +39,10 @@ function App() {
     setRandomPosition()
   }, [])
 
-  const onChoseNode = useCallback((chosenNode: string, selectedNode: string | null) => {
-    if (!selectedNode) return
-    console.log("choseNode", { chosenNode, selectedNode });
-  }, []);
 
   const onChosingNode = useCallback((nodeId: string) => {
-    if (!selectedNode) return
-    if (!chosingNode || selectedNode === nodeId) return;
-    onChoseNode(nodeId, selectedNode);
+    if (!selectedNodeRef.current) return
+    console.log("--> choseNode", { nodeId, selectedNodeRef: selectedNodeRef.current });
   }, [])
 
   return (
@@ -77,15 +55,11 @@ function App() {
           <img src={reactLogo} className="logo react" alt="React logo" />
         </a>
       </div>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-      </div>
 
       <div style={{ border: "solid 2px pink", width: "800px", height: "500px" }}>
         <button onClick={setRandomPosition}>{"move"}</button>
         {!chosingNode && <h3>Start Chosing Node (Tag, Child, Parent, Reference)</h3>}
+        <h4>selectedNode: {selectedNode}</h4>
         <MapInteractionCSS >
           {nodes.map(cur => {
             return <MemoizedNode
@@ -102,11 +76,6 @@ function App() {
           })}
         </MapInteractionCSS>
       </div>
-
-
-
-      {StepComponent}
-
     </div>
   )
 }

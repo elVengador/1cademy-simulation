@@ -1,13 +1,19 @@
 import React, { useCallback } from "react"
 
 type NodeProps = {
+  notebookRef: {
+    selectedNode: string | null;
+    chosingNode: boolean;
+  },
   id: string;
   top: number;
   left: number;
   title: string;
-  selectedNode: string | null;
+  nodeUpdates: {
+    nodeIds: string[],
+    updatedAt: Date
+  };
   onChoseNode: (nodeId: string, selectedNode: string) => void;
-  chosingNode: boolean;
   setChosingNode: (chosingNode: boolean) => void;
   setSelectedNode: (selectedNode: string | null) => void;
 }
@@ -17,29 +23,28 @@ const Node = ({
   top,
   left,
   title,
-  selectedNode,
+  notebookRef,
   onChoseNode,
-  chosingNode,
   setChosingNode,
   setSelectedNode
 }: NodeProps) => {
   console.log("node re-render", id);
 
   const onClick = useCallback(() => {
-    if(!chosingNode || selectedNode === id) return;
-    onChoseNode(id, selectedNode);
-  }, [chosingNode, selectedNode])
+    if(!notebookRef.chosingNode || notebookRef.selectedNode === id) return;
+    onChoseNode(id, notebookRef.selectedNode!);
+  }, [])
 
   return (
     <div key={id} id={id} style={{ position: "absolute", top, left, border: "solid 2px royalBlue" }} onClick={onClick}>
       {title}
-      {!chosingNode ? (
+      {!notebookRef.chosingNode ? (
         <button onClick={() => {
           setChosingNode(true);
         }}>Start Chosing Node (Tag, Child, Parent, Reference)</button>
       ) : null}
 
-      {id !== selectedNode ? (
+      {id !== notebookRef.selectedNode ? (
         <button onClick={() => setSelectedNode(id)}>
           Select Node
         </button>
@@ -49,12 +54,15 @@ const Node = ({
 }
 
 export const MemoizedNode = React.memo(Node, (prev, next) => {
-  return prev.chosingNode === next.chosingNode &&
-    prev.id === next.id &&
+  // if node is not updated don't render it
+  if(prev.nodeUpdates.updatedAt === next.nodeUpdates.updatedAt || !next.nodeUpdates.nodeIds.includes(next.id)) return true;
+
+  return false;
+
+  /* return prev.id === next.id &&
     prev.left === next.left &&
     prev.top === next.top &&
     prev.onChoseNode === next.onChoseNode &&
     prev.title === next.title &&
-    prev.setSelectedNode === next.setSelectedNode &&
-    prev.selectedNode !== next.selectedNode
+    prev.setSelectedNode === next.setSelectedNode */
 })

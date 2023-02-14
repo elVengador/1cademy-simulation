@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import reactLogo from './assets/react.svg'
 import './App.css'
 /* eslint-disable */ //This wrapper comments it to use react-map-interaction without types
@@ -42,14 +42,32 @@ function App() {
 
   const [count, setCount] = useState(0)
   const [nodes, setNodes] = useState(InitialNodes);
-  const [selectedNode, setSelectedNode] = useState<string | null>(null);
-  const [chosingNode, setChosingNode] = useState<boolean>(false);
+  
+  const [nodeUpdates, setNodeUpdates] = useState<{
+    nodeIds: string[],
+    updatedAt: Date
+  }>({
+    nodeIds: [],
+    updatedAt: new Date()
+  });
+
+  const notebookRef = useRef<{
+    selectedNode: string | null;
+    chosingNode: boolean;
+  }>({
+    selectedNode: null,
+    chosingNode: false
+  });
 
   const { currentStepIdx: currentStep, nextStep, previousStep, StepComponent, setCurrentStepIdx: setCurrentStep } = useInteractiveTutorial({ steps })
 
   const setRandomPosition = useCallback(() => {
     const randomNodes = nodes.map(cur => ({ ...cur, left: getRandom(500), top: getRandom(400) }))
     setNodes(randomNodes)
+    setNodeUpdates({
+      nodeIds: randomNodes.map(n => n.id),
+      updatedAt: new Date()
+    });
   }, [nodes])
 
   useEffect(() => {
@@ -59,6 +77,24 @@ function App() {
   const onChoseNode = useCallback((chosenNode: string, selectedNode: string) => {
     console.log("choseNode", {chosenNode, selectedNode});
   }, []);
+
+  const onSelectNode = useCallback((nodeId: string | null) => {
+    const prevCurrentNode = notebookRef.current.selectedNode!;
+    notebookRef.current.selectedNode = nodeId;
+    // setSelectedNode(nodeId)
+    setNodeUpdates({
+      nodeIds: [prevCurrentNode, nodeId!],
+      updatedAt: new Date()
+    })
+  }, [])
+
+  const onChosingNode = useCallback((chosingNode: boolean) => {
+    notebookRef.current.chosingNode = chosingNode;
+    setNodeUpdates({
+      nodeIds: [notebookRef.current.selectedNode!],
+      updatedAt: new Date()
+    })
+  }, [])
 
   return (
     <div className="App">
@@ -81,11 +117,11 @@ function App() {
         <MapInteractionCSS >
           {nodes.map(cur => {
             return <MemoizedNode
-              chosingNode={chosingNode}
-              selectedNode={selectedNode}
+              notebookRef={notebookRef.current}
               onChoseNode={onChoseNode}
-              setChosingNode={setChosingNode}
-              setSelectedNode={setSelectedNode}
+              setChosingNode={onChosingNode}
+              setSelectedNode={onSelectNode}
+              nodeUpdates={nodeUpdates}
               id={cur.id}
               left={cur.left}
               top={cur.top}

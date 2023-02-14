@@ -286,6 +286,7 @@ function App() {
                 position: "absolute",
                 top: `${toltipRect.top}px`,
                 left: `${toltipRect.left}px`,
+                transition:"top 1s ease-out,left 1s ease-out",
                 width: "200px",
                 backgroundColor: "#3a3838",
                 padding: "8px",

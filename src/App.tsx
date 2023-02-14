@@ -272,6 +272,8 @@ function App() {
               height: `${obj.height}px`,
               backgroundColor: "transparent",
               outline: "5000px solid #555555bd",
+
+              transition:"top 1s ease-out,left 1s ease-out",
               borderRadius: "1px",
               outlineOffset: "10px",
               boxSizing: "border-box",
@@ -306,7 +308,7 @@ function App() {
                 top: cur.top,
                 left: cur.left,
                 border: "solid 2px royalBlue",
-                width: "200px",
+                width: "150px",
 
 
                 height:"100px",

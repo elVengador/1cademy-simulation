@@ -13,6 +13,7 @@ export type Step = {
   title: string;
   description: string;
   tooltipPos: "top" | "bottom" | "left" | "right";
+  anchor: string
 };
 type Node = {
   id: string;
@@ -47,7 +48,7 @@ export const useInteractiveTutorial = ({
       }
 
       observeTries2.current += 1;
-      const element = document.getElementById(nodes[currentStepIdx].id);
+      const element = document.getElementById(steps[currentStepIdx].id);
       console.log({ element, id: nodes[currentStepIdx].id });
       if (!element) return;
 
@@ -82,6 +83,10 @@ export const useInteractiveTutorial = ({
   };
   // const completeTutorial = () => setCurrentStep(-1)
 
+  const anchorTutorial = useMemo(() => {
+    return steps[currentStepIdx]?.anchor ?? ""
+  }, [currentStepIdx])
+
   const tooltipClientRect = useMemo(() => {
     if (!tooltipRef.current) return { top: 0, left: 0 };
     let top = 0;
@@ -109,6 +114,7 @@ export const useInteractiveTutorial = ({
   }, [obj]);
 
   const tutorialComponent = useMemo(() => {
+    if (currentStepIdx < 0 || currentStepIdx >= steps.length) return null
     return (
       <div
         style={{
@@ -154,25 +160,14 @@ export const useInteractiveTutorial = ({
         </div>
       </div>
     );
-  }, [obj]);
-  const StepComponent: ReactNode = useMemo(() => {
-    if (currentStepIdx < 0) return null;
-    if (currentStepIdx >= steps.length) return null;
-
-    return (
-      <div style={{ border: "solid 2px red" }}>
-        <h5>{steps[currentStepIdx].title}</h5>
-        <p>{steps[currentStepIdx].description}</p>
-      </div>
-    );
-  }, [currentStepIdx]);
+  }, [currentStepIdx, obj]);
 
   return {
-    currentStepIdx,
-    nextStep,
-    previousStep,
+    // currentStepIdx,
+    // nextStep,
+    // previousStep,
     setCurrentStepIdx,
-    StepComponent,
     tutorialComponent,
+    anchorTutorial
   };
 };

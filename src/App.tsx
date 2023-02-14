@@ -1,7 +1,9 @@
+import ReactDOM from 'react-dom'
 import {
+  ReactNode,
   useCallback,
   useEffect,
-  
+
   useState,
 } from "react";
 import reactLogo from "./assets/react.svg";
@@ -22,28 +24,32 @@ type Node = {
 
 const steps: Step[] = [
   {
-    id: "n1",
+    id: "t-1",
     title: "step 1",
     description: "step-1",
-    tooltipPos: "bottom",
+    tooltipPos: "right",
+    anchor: "portal",
   },
   {
-    id: "n2",
+    id: "n1",
     title: "step 2",
     description: "step-2",
     tooltipPos: "left",
+    anchor: "",
   },
   {
-    id: "n3",
+    id: "t-2",
     title: "step 3",
     description: "step-3",
     tooltipPos: "right",
+    anchor: "portal",
   },
   {
-    id: "n4",
+    id: "n2",
     title: "step 4",
     description: "step-4",
     tooltipPos: "top",
+    anchor: "",
   },
 ];
 
@@ -90,10 +96,9 @@ function App() {
 
 
   const {
-    currentStepIdx: currentStep,
     tutorialComponent,
-    StepComponent,
-    setCurrentStepIdx: setCurrentStep,
+    setCurrentStepIdx,
+    anchorTutorial
   } = useInteractiveTutorial({ steps, nodes });
 
   const setRandomPosition = useCallback(() => {
@@ -137,6 +142,18 @@ function App() {
     });
   };
 
+  // ReactDOM.createPortal(child, container)
+  const Portal = ({ anchor, children }: { anchor: string, children: ReactNode }) => {
+    const el = document.getElementById(anchor)
+
+    if (!el) return null
+
+    return ReactDOM.createPortal(
+      children,
+      el
+    );
+  }
+
   return (
     <div className="App">
       <div>
@@ -147,9 +164,9 @@ function App() {
           <img src={reactLogo} className="logo react" alt="React logo" />
         </a>
       </div>
-     
 
-      <button onClick={() => setCurrentStep(0)}>start</button>
+
+      <button onClick={() => setCurrentStepIdx(0)}>start</button>
       <button onClick={setRandomPosition}>{"move"}</button>
       <button onClick={addNode}>{"Add"}</button>
       <button onClick={removeNode}>{"Remove"}</button>
@@ -158,6 +175,22 @@ function App() {
         id="container"
         style={{ border: "solid 2px pink", width: "800px", height: "500px" }}
       >
+        {anchorTutorial && <Portal anchor='portal' >{tutorialComponent}</Portal>}
+        <div
+          style={{
+            position: "absolute",
+            top: "0px",
+            left: "0px",
+            bottom: "0px",
+            width: "100px",
+            backgroundColor: "#804242",
+          }}
+        >
+          <h4 id="t-1">Lorem ipsum dolor sit amet.</h4>
+          <h4 id="t-2">Lorem ipsum dolor sit amet.</h4>
+          <h4 id="t-3">Lorem ipsum dolor sit amet.</h4>
+          <h4 id="t-4">Lorem ipsum dolor sit amet.</h4>
+        </div>
         <MapInteractionCSS>
           <div
             style={{
@@ -222,11 +255,22 @@ function App() {
               {cur.title}
             </div>
           ))}
-          {currentStep !== -1 && tutorialComponent}
+          {!anchorTutorial && tutorialComponent}
+          <div id="tt" style={{
+            position: "absolute",
+            top: "0px",
+            left: "0px",
+            bottom: "0px",
+            right: "0px",
+            background: "yellow",
+            boxSizing: "border-box",
+          }}>
+
+            {/* <Portal anchor='tt' >{tutorialComponent}</Portal> */}
+            {/* {tutorialComponent} */}
+          </div>
         </MapInteractionCSS>
       </div>
-
-      {StepComponent}
     </div>
   );
 }

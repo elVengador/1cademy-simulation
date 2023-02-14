@@ -5,6 +5,7 @@ import './App.css'
 // @ts-ignore
 import { MapInteractionCSS } from "react-map-interaction";
 import { Step, useInteractiveTutorial } from './useInteractiveTutorial';
+import { MemoizedNode } from './components/Node';
 /* eslint-enable */
 
 type Node = {
@@ -37,8 +38,13 @@ const InitialNodes: Node[] = [
 ]
 
 function App() {
+  console.log("Notebook re-render");
+
   const [count, setCount] = useState(0)
-  const [nodes, setNodes] = useState(InitialNodes)
+  const [nodes, setNodes] = useState(InitialNodes);
+  const [selectedNode, setSelectedNode] = useState<string | null>(null);
+  const [chosingNode, setChosingNode] = useState<boolean>(false);
+
   const { currentStepIdx: currentStep, nextStep, previousStep, StepComponent, setCurrentStepIdx: setCurrentStep } = useInteractiveTutorial({ steps })
 
   const setRandomPosition = useCallback(() => {
@@ -49,6 +55,10 @@ function App() {
   useEffect(() => {
     setRandomPosition()
   }, [])
+
+  const onChoseNode = useCallback((chosenNode: string, selectedNode: string) => {
+    console.log("choseNode", {chosenNode, selectedNode});
+  }, []);
 
   return (
     <div className="App">
@@ -67,14 +77,22 @@ function App() {
       </div>
 
       <div style={{ border: "solid 2px pink", width: "800px", height: "500px" }}>
-        <button onClick={previousStep}>{"<<"}</button>
-        <button onClick={() => setCurrentStep(0)} >start</button>
-        <button onClick={nextStep}>{">>"}</button>
         <button onClick={setRandomPosition}>{"move"}</button>
         <MapInteractionCSS >
-          {nodes.map(cur => <div key={cur.id} id={cur.id} style={{ position: "absolute", top: cur.top, left: cur.left, border: "solid 2px royalBlue" }}>
-            {cur.title}
-          </div>)}
+          {nodes.map(cur => {
+            return <MemoizedNode
+              chosingNode={chosingNode}
+              selectedNode={selectedNode}
+              onChoseNode={onChoseNode}
+              setChosingNode={setChosingNode}
+              setSelectedNode={setSelectedNode}
+              id={cur.id}
+              left={cur.left}
+              top={cur.top}
+              title={cur.title}
+              key={cur.id}
+              />
+          })}
         </MapInteractionCSS>
       </div>
 

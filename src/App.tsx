@@ -26,9 +26,11 @@ const steps: Step[] = [
   {
     id: "t-1",
     title: "step 1",
-    description: "step-1",
+    description: "step-1 with Cb",
     tooltipPos: "right",
     anchor: "portal",
+    callback: () => console.log('doing cb in step t1'),
+    disabledElements: ['button-1']
   },
   {
     id: "n1",
@@ -36,6 +38,7 @@ const steps: Step[] = [
     description: "step-2",
     tooltipPos: "left",
     anchor: "",
+    disabledElements: ['button-2']
   },
   {
     id: "t-2",
@@ -43,13 +46,16 @@ const steps: Step[] = [
     description: "step-3",
     tooltipPos: "right",
     anchor: "portal",
+    disabledElements: ['button-1', 'button-2']
   },
   {
     id: "n2",
     title: "step 4",
-    description: "step-4",
+    description: "step-4 with Cb",
     tooltipPos: "top",
     anchor: "",
+    callback: () => console.log('doing cb in step n2'),
+    disabledElements: []
   },
 ];
 
@@ -96,6 +102,7 @@ function App() {
 
 
   const {
+    disabledElements,
     currentStep,
     tutorialComponent,
     setCurrentStepIdx,
@@ -156,12 +163,7 @@ function App() {
   }
 
   return (
-    <div className="App" onClick={(e)=>{
-      console.log({currentStep}) 
-        if(!currentStep) return;
-        if(currentStep.id===e.target.id) console.log("enabled click",currentStep.id)
-        
-      }}>
+    <div className="App" >
       <div>
         <a href="https://vitejs.dev" target="_blank">
           <img src="/vite.svg" className="logo" alt="Vite logo" />
@@ -196,52 +198,23 @@ function App() {
           <h4 id="t-2">Lorem ipsum dolor sit amet.</h4>
           <h4 id="t-3">Lorem ipsum dolor sit amet.</h4>
           <h4 id="t-4">Lorem ipsum dolor sit amet.</h4>
+          {
+            disabledElements.includes('button-1')
+              ? <button>btn-x 1 blocked</button>
+              : <button id="button-1">btn-x 1</button>
+          }
+          {
+            disabledElements.includes('button-2')
+              ? <button>btn-x 2 blocked</button>
+              : <button id="button-2">btn-x 2</button>
+          }
         </div>
         <MapInteractionCSS>
-          <div
-            style={{
-              position: "absolute",
-              top: "0px",
-              left: "0px",
-              width: "4px",
-              height: "4px",
-              borderRadius: "50%",
-              backgroundColor: "red",
-            }}
-          ></div>
-          <div
-            style={{
-              position: "absolute",
-              top: "0px",
-              left: "100px",
-              width: "4px",
-              height: "4px",
-              borderRadius: "50%",
-              backgroundColor: "green",
-            }}
-          ></div>
-          <div
-            style={{
-              position: "absolute",
-              top: "0px",
-              left: "200px",
-              width: "4px",
-              height: "4px",
-              borderRadius: "50%",
-              backgroundColor: "blue",
-            }}
-          ></div>
-          <div
-            style={{
-              position: "absolute",
-              top: "0px",
-              left: "300px",
-              width: "4px",
-              height: "4px",
-              borderRadius: "50%",
-              backgroundColor: "purple",
-            }}
-          ></div>
+          <Dot top={"0px"} left={"0px"} backgroundColor={"red"} />
+          <Dot top={"0px"} left={"100px"} backgroundColor={"green"} />
+          <Dot top={"0px"} left={"200px"} backgroundColor={"blue"} />
+          <Dot top={"0px"} left={"300px"} backgroundColor={"purple"} />
+
           {nodes.map((cur) => (
             <div
               // ref={cur.id === "n1" ? ref : null}
@@ -259,7 +232,7 @@ function App() {
               }}
             >
               {cur.title}
-              <button onClick={()=>alert("Clicked")}>Click</button>
+              <button onClick={() => alert("Clicked")}>Click</button>
             </div>
           ))}
           {!anchorTutorial && tutorialComponent}
@@ -280,6 +253,21 @@ function App() {
       </div>
     </div>
   );
+}
+
+type DotProps = { top: string, left: string, backgroundColor: string }
+const Dot = ({ top, left, backgroundColor }: DotProps) => {
+  return <div
+    style={{
+      position: "absolute",
+      top,
+      left,
+      width: "4px",
+      height: "4px",
+      borderRadius: "50%",
+      backgroundColor,
+    }}
+  ></div>
 }
 
 export default App;

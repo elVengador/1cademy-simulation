@@ -14,6 +14,8 @@ export type Step = {
   description: string;
   tooltipPos: "top" | "bottom" | "left" | "right";
   anchor: string;
+  callback?: () => void
+  disabledElements: string[]
 };
 type Node = {
   id: string;
@@ -71,6 +73,17 @@ export const useInteractiveTutorial = ({
     };
   }, [currentStepIdx, nodes]);
 
+  const currentStep = useMemo(() => {
+    return steps[currentStepIdx];
+  }, [currentStepIdx]);
+
+  const disabledElements = useMemo(() => currentStep?.disabledElements ?? [], [currentStepIdx])
+
+  useEffect(() => {
+    if (!currentStep) return
+    currentStep.callback && currentStep.callback()
+  }, [currentStep])
+
   const nextStep = () => {
     if (currentStepIdx < 0) return;
     if (currentStepIdx === steps.length - 1) return setCurrentStepIdx(-1);
@@ -113,9 +126,7 @@ export const useInteractiveTutorial = ({
     return { top, left };
   }, [obj]);
 
-  const currentStep = useMemo(() => {
-    return steps[currentStepIdx];
-  }, [currentStepIdx]);
+
 
   const tutorialComponent = useMemo(() => {
     if (currentStepIdx < 0 || currentStepIdx >= steps.length) return null;
@@ -133,7 +144,7 @@ export const useInteractiveTutorial = ({
           borderRadius: "1px",
           outlineOffset: "10px",
           boxSizing: "border-box",
-          pointerEvents: "none",
+          // pointerEvents: "none",
           zIndex: 999,
         }}
       >
@@ -157,7 +168,7 @@ export const useInteractiveTutorial = ({
           <button onClick={previousStep}>{"<<"}</button>
 
           {currentStepIdx < steps.length - 1 && (
-            <button onClick={nextStep} style={{zIndex:898999}}>{">>"}</button>
+            <button onClick={nextStep} style={{ zIndex: 898999 }}>{">>"}</button>
           )}
           {currentStepIdx === steps.length - 1 && (
             <button onClick={nextStep}>{"Finalize"}</button>
@@ -171,6 +182,7 @@ export const useInteractiveTutorial = ({
     // currentStepIdx,
     // nextStep,
     // previousStep,
+    disabledElements,
     currentStep,
     setCurrentStepIdx,
     tutorialComponent,

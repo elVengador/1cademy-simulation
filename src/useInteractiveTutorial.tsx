@@ -44,6 +44,13 @@ export const useInteractiveTutorial = ({
     // detect element mounted to get clientRect values
     if (!nodes[currentStepIdx]) return;
 
+    const targetId = steps[currentStepIdx].id
+
+    if (!targetId) {// NO target id => show tooltip in screen center
+      return setTargetClientRect({ width: 0, height: 0, top: 0, left: 0 });
+    }
+
+
     const intervalId = setInterval(() => {
       if (observeTries2.current >= DEFAULT_NUMBER_OF_TRIES) {
         observeTries2.current = 0;
@@ -52,7 +59,7 @@ export const useInteractiveTutorial = ({
       }
 
       observeTries2.current += 1;
-      const element = document.getElementById(steps[currentStepIdx].id);
+      const element = document.getElementById(targetId);
 
       if (!element) return;
 
@@ -126,7 +133,51 @@ export const useInteractiveTutorial = ({
 
 
   const tutorialComponent = useMemo(() => {
+    console.log({ targetClientRect })
     if (currentStepIdx < 0 || currentStepIdx >= steps.length) return null;
+    if (targetClientRect.top === 0
+      && targetClientRect.left === 0
+      && targetClientRect.width === 0
+      && targetClientRect.height === 0) return (
+        <div
+          style={{
+            position: "absolute",
+            top: "0px",
+            bottom: "0px",
+            left: "0px",
+            right: "0px",
+            backgroundColor: "#5555552d",
+            transition: "top 1s ease-out,left 1s ease-out",
+            boxSizing: "border-box",
+            zIndex: 999,
+            display: "grid",
+            placeItems: "center"
+          }}
+        >
+          <div
+            ref={tooltipRef}
+            style={{
+              transition: "top 1s ease-out,left 1s ease-out",
+              width: "200px",
+              backgroundColor: "#3a3838",
+              padding: "8px",
+              borderRadius: "8px",
+              color: "white",
+            }}
+          >
+            <h2>{currentStep.title}</h2>
+            <p>{currentStep.description}</p>
+            <button onClick={onPreviousStep}>{"<<"}</button>
+
+            {currentStepIdx < steps.length - 1 && (
+              <button onClick={onNextStep} style={{ zIndex: 898999 }}>{">>"}</button>
+            )}
+            {currentStepIdx === steps.length - 1 && (
+              <button onClick={onNextStep}>{"Finalize"}</button>
+            )}
+          </div>
+        </div>
+      )
     return (
       <div
         style={{

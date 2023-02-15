@@ -24,6 +24,14 @@ type Node = {
 
 const steps: Step[] = [
   {
+    id: "",
+    title: "step without target",
+    description: "description step without target",
+    tooltipPos: "right",
+    anchor: "portal",
+    disabledElements: []
+  },
+  {
     id: "t-1",
     title: "step 1",
     description: "description step-1 with Cb",

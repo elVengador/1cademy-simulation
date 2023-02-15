@@ -29,17 +29,19 @@ type UseInteractiveTutorialProps = { steps: Step[]; nodes: Node[] };
 
 const DEFAULT_NUMBER_OF_TRIES = 5;
 const TOOLTIP_OFFSET = 20;
+
 export const useInteractiveTutorial = ({
   steps,
   nodes,
 }: UseInteractiveTutorialProps) => {
   const [currentStepIdx, setCurrentStepIdx] = useState(-1);
-  const [obj, setObj] = useState({ width: 0, height: 0, top: 0, left: 0 });
-
+  const [targetClientRect, setTargetClientRect] = useState({ width: 0, height: 0, top: 0, left: 0 });
   const tooltipRef = useRef<HTMLDivElement | null>(null);
   const observeTries2 = useRef(0);
 
   useLayoutEffect(() => {
+
+    // detect element mounted to get clientRect values
     if (!nodes[currentStepIdx]) return;
 
     const intervalId = setInterval(() => {
@@ -54,7 +56,7 @@ export const useInteractiveTutorial = ({
 
       if (!element) return;
 
-      setObj({
+      setTargetClientRect({
         width: element.clientWidth,
         height: element.clientHeight,
         top: element.offsetTop,
@@ -71,9 +73,7 @@ export const useInteractiveTutorial = ({
     };
   }, [currentStepIdx, nodes]);
 
-  const currentStep = useMemo(() => {
-    return steps[currentStepIdx];
-  }, [currentStepIdx]);
+  const currentStep = useMemo(() => steps[currentStepIdx], [currentStepIdx]);
 
   const disabledElements = useMemo(() => currentStep?.disabledElements ?? [], [currentStepIdx])
 
@@ -82,17 +82,16 @@ export const useInteractiveTutorial = ({
     currentStep.callback && currentStep.callback()
   }, [currentStep])
 
-  const nextStep = () => {
+  const onNextStep = () => {
     if (currentStepIdx < 0) return;
     if (currentStepIdx === steps.length - 1) return setCurrentStepIdx(-1);
 
     setCurrentStepIdx((prev) => prev + 1);
   };
-  const previousStep = () => {
+  const onPreviousStep = () => {
     if (currentStepIdx <= 0) return;
     setCurrentStepIdx((prev) => prev - 1);
   };
-  // const completeTutorial = () => setCurrentStep(-1)
 
   const anchorTutorial = useMemo(() => {
     return steps[currentStepIdx]?.anchor ?? "";
@@ -107,22 +106,22 @@ export const useInteractiveTutorial = ({
 
     if (pos === "top") {
       top = 0 - tooltipRef.current.clientHeight - TOOLTIP_OFFSET;
-      left = obj.width / 2 - tooltipRef.current.clientWidth / 2;
+      left = targetClientRect.width / 2 - tooltipRef.current.clientWidth / 2;
     }
     if (pos === "bottom") {
-      top = obj.height + TOOLTIP_OFFSET;
-      left = obj.width / 2 - tooltipRef.current.clientWidth / 2;
+      top = targetClientRect.height + TOOLTIP_OFFSET;
+      left = targetClientRect.width / 2 - tooltipRef.current.clientWidth / 2;
     }
     if (pos === "left") {
-      top = obj.height / 2 - tooltipRef.current.clientHeight / 2;
+      top = targetClientRect.height / 2 - tooltipRef.current.clientHeight / 2;
       left = 0 - tooltipRef.current.clientWidth - TOOLTIP_OFFSET;
     }
     if (pos === "right") {
-      top = obj.height / 2 - tooltipRef.current.clientHeight / 2;
-      left = obj.width + TOOLTIP_OFFSET;
+      top = targetClientRect.height / 2 - tooltipRef.current.clientHeight / 2;
+      left = targetClientRect.width + TOOLTIP_OFFSET;
     }
     return { top, left };
-  }, [obj]);
+  }, [targetClientRect]);
 
 
 
@@ -132,10 +131,10 @@ export const useInteractiveTutorial = ({
       <div
         style={{
           position: "absolute",
-          top: `${obj.top}px`,
-          left: `${obj.left}px`,
-          width: `${obj.width}px`,
-          height: `${obj.height}px`,
+          top: `${targetClientRect.top}px`,
+          left: `${targetClientRect.left}px`,
+          width: `${targetClientRect.width}px`,
+          height: `${targetClientRect.height}px`,
           backgroundColor: "transparent",
           outline: "5000px solid #5555552d",
           transition: "top 1s ease-out,left 1s ease-out",
@@ -148,7 +147,7 @@ export const useInteractiveTutorial = ({
       >
         <div
           ref={tooltipRef}
-          className={`tooltip tooltip-${steps[currentStepIdx].tooltipPos}`}
+          className={`tooltip tooltip-${currentStep.tooltipPos}`}
           style={{
             position: "absolute",
             top: `${tooltipClientRect.top}px`,
@@ -161,25 +160,26 @@ export const useInteractiveTutorial = ({
             color: "white",
           }}
         >
-          <h2>{nodes[currentStepIdx]?.title}</h2>
-          <p>Lorem ipsum dolor sit, amet consectetur adipisicing elit.</p>
-          <button onClick={previousStep}>{"<<"}</button>
+          <h2>{currentStep.title}</h2>
+          <p>{currentStep.description}</p>
+          <button onClick={onPreviousStep}>{"<<"}</button>
 
           {currentStepIdx < steps.length - 1 && (
-            <button onClick={nextStep} style={{ zIndex: 898999 }}>{">>"}</button>
+            <button onClick={onNextStep} style={{ zIndex: 898999 }}>{">>"}</button>
           )}
           {currentStepIdx === steps.length - 1 && (
-            <button onClick={nextStep}>{"Finalize"}</button>
+            <button onClick={onNextStep}>{"Finalize"}</button>
           )}
         </div>
       </div>
     );
-  }, [currentStepIdx, obj]);
+  }, [currentStepIdx, targetClientRect]);
 
   return {
-    // currentStepIdx,
-    // nextStep,
-    // previousStep,
+    targetClientRect,
+    currentStepIdx,
+    onNextStep,
+    onPreviousStep,
     disabledElements,
     currentStep,
     setCurrentStepIdx,

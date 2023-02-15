@@ -26,7 +26,7 @@ const steps: Step[] = [
   {
     id: "t-1",
     title: "step 1",
-    description: "step-1 with Cb",
+    description: "description step-1 with Cb",
     tooltipPos: "right",
     anchor: "portal",
     callback: () => console.log('doing cb in step t1'),
@@ -35,7 +35,7 @@ const steps: Step[] = [
   {
     id: "n1",
     title: "step 2",
-    description: "step-2",
+    description: "description step-2",
     tooltipPos: "left",
     anchor: "",
     disabledElements: ['button-2']
@@ -43,7 +43,7 @@ const steps: Step[] = [
   {
     id: "t-2",
     title: "step 3",
-    description: "step-3",
+    description: "description step-3",
     tooltipPos: "right",
     anchor: "portal",
     disabledElements: ['button-1', 'button-2']
@@ -51,7 +51,7 @@ const steps: Step[] = [
   {
     id: "n2",
     title: "step 4",
-    description: "step-4 with Cb",
+    description: "description step-4 with Cb",
     tooltipPos: "top",
     anchor: "",
     callback: () => console.log('doing cb in step n2'),
@@ -103,7 +103,6 @@ function App() {
 
   const {
     disabledElements,
-    currentStep,
     tutorialComponent,
     setCurrentStepIdx,
     anchorTutorial
@@ -142,7 +141,6 @@ function App() {
     setNodes((prev) => {
       return [...prev, newNode];
     });
-    // setObj(prevObj=>return {...prevObj,})
   };
   const removeNode = () => {
     setNodes((prev) => {
@@ -150,7 +148,7 @@ function App() {
     });
   };
 
-  // ReactDOM.createPortal(child, container)
+
   const Portal = ({ anchor, children }: { anchor: string, children: ReactNode }) => {
     const el = document.getElementById(anchor)
 
@@ -236,19 +234,7 @@ function App() {
             </div>
           ))}
           {!anchorTutorial && tutorialComponent}
-          <div id="tt" style={{
-            position: "absolute",
-            top: "0px",
-            left: "0px",
-            bottom: "0px",
-            right: "0px",
-            background: "yellow",
-            boxSizing: "border-box",
-          }}>
 
-            {/* <Portal anchor='tt' >{tutorialComponent}</Portal> */}
-            {/* {tutorialComponent} */}
-          </div>
         </MapInteractionCSS>
       </div>
     </div>

@@ -51,10 +51,8 @@ export const useInteractiveTutorial = ({
 
       observeTries2.current += 1;
       const element = document.getElementById(steps[currentStepIdx].id);
-      console.log({ element, id: nodes[currentStepIdx].id });
-      if (!element) return;
 
-      console.log("not reached");
+      if (!element) return;
 
       setObj({
         width: element.clientWidth,

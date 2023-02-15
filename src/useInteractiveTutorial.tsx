@@ -113,6 +113,10 @@ export const useInteractiveTutorial = ({
     return { top, left };
   }, [obj]);
 
+  const currentStep = useMemo(() => {
+    return steps[currentStepIdx];
+  }, [currentStepIdx]);
+
   const tutorialComponent = useMemo(() => {
     if (currentStepIdx < 0 || currentStepIdx >= steps.length) return null;
     return (
@@ -126,9 +130,10 @@ export const useInteractiveTutorial = ({
           backgroundColor: "transparent",
           outline: "5000px solid #5555552d",
           transition: "top 1s ease-out,left 1s ease-out",
-          borderRadius: "1px",  
+          borderRadius: "1px",
           outlineOffset: "10px",
           boxSizing: "border-box",
+          pointerEvents: "none",
           zIndex: 999,
         }}
       >
@@ -152,7 +157,7 @@ export const useInteractiveTutorial = ({
           <button onClick={previousStep}>{"<<"}</button>
 
           {currentStepIdx < steps.length - 1 && (
-            <button onClick={nextStep}>{">>"}</button>
+            <button onClick={nextStep} style={{zIndex:898999}}>{">>"}</button>
           )}
           {currentStepIdx === steps.length - 1 && (
             <button onClick={nextStep}>{"Finalize"}</button>
@@ -166,6 +171,7 @@ export const useInteractiveTutorial = ({
     // currentStepIdx,
     // nextStep,
     // previousStep,
+    currentStep,
     setCurrentStepIdx,
     tutorialComponent,
     anchorTutorial,

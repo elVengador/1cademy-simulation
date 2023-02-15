@@ -96,6 +96,7 @@ function App() {
 
 
   const {
+    currentStep,
     tutorialComponent,
     setCurrentStepIdx,
     anchorTutorial
@@ -155,7 +156,12 @@ function App() {
   }
 
   return (
-    <div className="App">
+    <div className="App" onClick={(e)=>{
+      console.log({currentStep}) 
+        if(!currentStep) return;
+        if(currentStep.id===e.target.id) console.log("enabled click",currentStep.id)
+        
+      }}>
       <div>
         <a href="https://vitejs.dev" target="_blank">
           <img src="/vite.svg" className="logo" alt="Vite logo" />
@@ -253,6 +259,7 @@ function App() {
               }}
             >
               {cur.title}
+              <button onClick={()=>alert("Clicked")}>Click</button>
             </div>
           ))}
           {!anchorTutorial && tutorialComponent}

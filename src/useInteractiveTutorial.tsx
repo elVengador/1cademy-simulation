@@ -126,7 +126,7 @@ export const useInteractiveTutorial = ({
           backgroundColor: "transparent",
           outline: "5000px solid #5555552d",
           transition: "top 1s ease-out,left 1s ease-out",
-          borderRadius: "1px",
+          borderRadius: "1px",  
           outlineOffset: "10px",
           boxSizing: "border-box",
           zIndex: 999,
